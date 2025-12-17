@@ -43,11 +43,10 @@ def load_resources():
     
     # Load all SMOTE models
     model_files = {
-        "Logistic Regression": "logistic_regression_smote_churn.pkl",
-        "Decision Tree": "decision_tree_smote_churn.pkl",
+
+        
         "Random Forest": "random_forest_smote_churn.pkl",
         "KNN": "knn_smote_churn.pkl",
-        "SVM": "svm_smote_churn.pkl",
         "XGBoost": "xgboost_smote_churn.pkl",
     }
     
@@ -119,8 +118,17 @@ def make_predictions(input_df):
             print(f"⚠️ Error with {name}: {str(e)}")
             continue
     
-    avg_probability = np.mean(list(probabilities.values()))
-    return avg_probability, probabilities
+    # Calculate weighted average from XGBoost, SVM, and Random Forest
+    top_models = ["XGBoost", "SVM", "Random Forest"]
+    top_model_probs = [probabilities[name] for name in top_models if name in probabilities]
+    
+    if top_model_probs:
+        weighted_probability = np.mean(top_model_probs)
+    else:
+        # Fallback to all models average if top models not available
+        weighted_probability = np.mean(list(probabilities.values()))
+    
+    return weighted_probability, probabilities
 
 # =========================
 # VISUALIZATION
